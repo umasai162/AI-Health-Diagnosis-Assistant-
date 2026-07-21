@@ -65,13 +65,23 @@ app = FastAPI(
 # ──────────────────────────────────────────────
 # CORS Middleware
 # ──────────────────────────────────────────────
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=CORS_ORIGINS,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+cors_origins_list = [o.strip() for o in CORS_ORIGINS if o.strip()] if isinstance(CORS_ORIGINS, list) else ["*"]
+if "*" in cors_origins_list or not cors_origins_list:
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["*"],
+        allow_credentials=False,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
+else:
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=cors_origins_list,
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
 
 # ──────────────────────────────────────────────
 # Global Exception Handler
@@ -105,7 +115,7 @@ app.include_router(voice_router)
 @app.get("/", tags=["Health"])
 def home():
     """Root endpoint — confirms the API is running. Serves frontend if built."""
-    if os.path.exists("static"):
+    if os.path.exists("static/index.html"):
         return FileResponse("static/index.html")
     return {
         "message": "Welcome to AI Health Diagnosis Assistant",
@@ -123,14 +133,24 @@ def health():
 # ──────────────────────────────────────────────
 # Mount static folder if it exists (for production)
 if os.path.exists("static"):
-    app.mount("/assets", StaticFiles(directory="static/assets"), name="assets")
+    if os.path.exists("static/assets"):
+        app.mount("/assets", StaticFiles(directory="static/assets"), name="assets")
     
     @app.api_route("/{path_name:path}", methods=["GET"])
     async def catch_all(request: Request, path_name: str):
         """
         Catch-all route to serve React's index.html for SPA routing.
-        Skips /api, /docs, /openapi.json
+        Skips API endpoints and serves static files if requested.
         """
-        if path_name.startswith("docs") or path_name.startswith("openapi.json"):
+        api_prefixes = ("auth", "users", "reports", "ai", "chat", "voice", "health", "docs", "openapi.json", "uploads")
+        if any(path_name.startswith(prefix) for prefix in api_prefixes):
             return JSONResponse({"detail": "Not Found"}, status_code=404)
-        return FileResponse("static/index.html")
+
+        static_file_path = os.path.join("static", path_name)
+        if os.path.isfile(static_file_path):
+            return FileResponse(static_file_path)
+
+        if os.path.exists("static/index.html"):
+            return FileResponse("static/index.html")
+
+        return JSONResponse({"detail": "Not Found"}, status_code=404)
