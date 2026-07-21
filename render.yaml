@@ -3,12 +3,14 @@ services:
     name: ai-health-assistant
     env: docker
     dockerfilePath: Dockerfile
-    plan: starter
+    plan: free
     healthCheckPath: /health
-    disk:
-      name: chroma-storage
-      mountPath: /app/backend/chroma_db
-      sizeGB: 1
+    # Note: Free tier on Render does not support persistent disks.
+    # Uncomment the lines below if you deploy on a paid plan (e.g. starter) to persist RAG indices.
+    # disk:
+    #   name: chroma-storage
+    #   mountPath: /app/backend/chroma_db
+    #   sizeGB: 1
     envVars:
       - key: GEMINI_API_KEY
         sync: false

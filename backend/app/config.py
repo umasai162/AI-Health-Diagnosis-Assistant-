@@ -17,7 +17,7 @@ load_dotenv(dotenv_path=env_path)
 # ──────────────────────────────────────────────
 # Database
 # ──────────────────────────────────────────────
-DATABASE_URL: str = os.getenv("DATABASE_URL", "")
+DATABASE_URL: str = os.getenv("DATABASE_URL", "sqlite:///./ai_health.db")
 
 # ──────────────────────────────────────────────
 # JWT Authentication
