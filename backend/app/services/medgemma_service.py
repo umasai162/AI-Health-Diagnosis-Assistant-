@@ -14,10 +14,20 @@ from app.prompts.medical_prompt import ANALYSIS_PROMPT, CHAT_PROMPT, TELUGU_TRAN
 
 logger = logging.getLogger(__name__)
 
-if not GEMINI_API_KEY:
-    raise RuntimeError("GEMINI_API_KEY is not set in environment variables")
+# Lazy client — initialized on first use so the server can start without the key
+_client = None
 
-client = genai.Client(api_key=GEMINI_API_KEY)
+
+def _get_client():
+    """Return a cached Gemini client, creating it on first call."""
+    global _client
+    if _client is None:
+        if not GEMINI_API_KEY:
+            raise RuntimeError(
+                "GEMINI_API_KEY is not set. Add it in your Render environment variables."
+            )
+        _client = genai.Client(api_key=GEMINI_API_KEY)
+    return _client
 
 
 def _call_gemini(prompt: str, max_retries: int = 3) -> str:
@@ -25,6 +35,7 @@ def _call_gemini(prompt: str, max_retries: int = 3) -> str:
     Call the Gemini API with retry logic.
     Returns the raw text response.
     """
+    client = _get_client()
     for attempt in range(max_retries):
         try:
             response = client.models.generate_content(
