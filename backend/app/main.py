@@ -104,7 +104,9 @@ app.include_router(voice_router)
 # ──────────────────────────────────────────────
 @app.get("/", tags=["Health"])
 def home():
-    """Root endpoint — confirms the API is running."""
+    """Root endpoint — confirms the API is running. Serves frontend if built."""
+    if os.path.exists("static"):
+        return FileResponse("static/index.html")
     return {
         "message": "Welcome to AI Health Diagnosis Assistant",
         "docs": "/docs",
