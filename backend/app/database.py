@@ -2,9 +2,14 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
 from app.config import DATABASE_URL
 
-# Create MySQL engine
+# Fix database URL scheme for PostgreSQL if provided by cloud platforms like Render
+db_url = DATABASE_URL
+if db_url.startswith("postgres://"):
+    db_url = db_url.replace("postgres://", "postgresql://", 1)
+
+# Create engine
 engine = create_engine(
-    DATABASE_URL,
+    db_url,
     pool_pre_ping=True
 )
 
