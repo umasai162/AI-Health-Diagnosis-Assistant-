@@ -23,8 +23,7 @@ easyocr==1.7.1
 google-genai==1.0.0
 
 # ── RAG ──
-# sentence-transformers==3.0.1
-# chromadb==0.5.5
+chromadb==0.5.5
 
 # ── Voice ──
 gTTS==2.5.3
