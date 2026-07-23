@@ -239,7 +239,7 @@ export default function ChatPage() {
     
     // Split text into chunks of maximum 150 characters
     const chunks = [];
-    const rawChunks = text.split(/([।\n!\?\.,:;()（）])/);
+    const rawChunks = text.split(/([।\n!?.,:;()（）])/);
     let currentChunk = "";
     
     for (const part of rawChunks) {
@@ -299,7 +299,7 @@ export default function ChatPage() {
     let textToSpeak = text;
     if (lang === 'te') {
       // 1. Remove brackets with English words/numbers, e.g. (Protein) or (dal) or (Vitamin B-12)
-      textToSpeak = textToSpeak.replace(/\([A-Za-z0-9\s,\-\./+]*\)/g, '');
+      textToSpeak = textToSpeak.replace(/\([A-Za-z0-9\s,\-./+]*\)/g, '');
       // 2. Remove any remaining standalone English words/letters
       textToSpeak = textToSpeak.replace(/[A-Za-z]+/g, '');
       // 3. Clean up extra spaces/empty lines
